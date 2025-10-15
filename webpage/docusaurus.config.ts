@@ -5,7 +5,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
 const config: Config = {
-  title: 'Se não mudar, mamou',
+  title: 'Arquitetura de Software',
   favicon: 'img/firelink.png',
 
   url: 'https://firelink-library.github.io',
@@ -29,7 +29,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/firelink-library/docusaurus-template/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/firelink-library/swe',
           routeBasePath: '/',
           remarkPlugins: [remarkMath],
           rehypePlugins: [rehypeKatex]
@@ -40,7 +40,7 @@ const config: Config = {
             xslt: true,
           },
           editUrl:
-            'https://github.com/firelink-library/docusaurus-template/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/firelink-library/swe',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -57,7 +57,7 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'Template docusaurus',
+      title: 'SWE',
       logo: {
         alt: 'Logo Firelink Lib.',
         src: 'img/firelink.png',
@@ -70,7 +70,7 @@ const config: Config = {
           label: 'Tutorial',
         },
         {
-          href: 'https://github.com/firelink-library/docusaurus-template',
+          href: 'https://github.com/firelink-library/swe',
           label: 'GitHub',
           position: 'right',
         },
