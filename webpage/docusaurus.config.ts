@@ -9,10 +9,10 @@ const config: Config = {
   favicon: 'img/firelink.png',
 
   url: 'https://firelink-library.github.io',
-  baseUrl: '/docusaurus-template',
+  baseUrl: '/swe',
 
   organizationName: 'Firelink Library',
-  projectName: 'docusaurus-template',
+  projectName: 'Arquitetura de Software',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -63,12 +63,6 @@ const config: Config = {
         src: 'img/firelink.png',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
         {
           href: 'https://github.com/firelink-library/swe',
           label: 'GitHub',
