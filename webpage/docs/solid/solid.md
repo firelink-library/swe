@@ -3,6 +3,8 @@ sidebar_position: 1
 slug: /solid/definicoes
 ---
 
+# Definição e Princípios
+
 
 Pessoal, vamos estudar os padrões de como desenvolver soluções de software utilizando os princípios do S.O.L.I.D..
 

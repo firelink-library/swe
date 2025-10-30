@@ -3,6 +3,8 @@ sidebar_position: 3
 slug: /design-patterns/estruturais
 ---
 
+# Padrões Estruturais
+
 Os padrões estruturais explicam como construir objetos e classes em estruturas maiores, mantendo elas flexíveis e eficientes. Alguns dos padrões compreendidos aqui são:
 
 - **Adapter**: permite criar objetos com interfaces incompatíveis possam colaborar;
