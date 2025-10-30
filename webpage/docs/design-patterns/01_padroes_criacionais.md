@@ -480,5 +480,6 @@ class SingletonHolderDemo {
 * **Prototype:** pense em **duplicar estado** (cópia), não em “construir do zero”.
 * **Singleton:** use **com moderação**; prefira **injeção de dependência** quando possível.
 
-Se quiser, eu formato isso em um único arquivo `.mdx` no seu estilo (com tabs/alertas, etc.) ou adiciono diagramas UML simples. Quer que eu gere um **arquivo pronto** para colocar no seu Docusaurus?
+
+
 
