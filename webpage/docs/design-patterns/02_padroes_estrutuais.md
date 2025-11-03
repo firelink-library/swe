@@ -315,7 +315,15 @@ class Main {
 
 ## 3. Composite
 
-O Composite permite compor objetos em estruturas em árvore (parte–todo) e tratar objetos individuais e composições de maneira uniforme.
+O Composite permite compor objetos em estruturas em árvore (parte–todo) e tratar objetos individuais e composições de maneira uniforme. A ideia é compor objetos em árvore (parte–todo) e permitir que cliente trate folhas e composições de forma uniforme.
+
+Devemos utilizar quando temos hierarquias naturais (ex.: cena → grupo → sprite; pasta → subpastas → arquivos; menu → submenu → itens). Quando o cliente precisa chamar o mesmo método em nós simples e compostos: draw(), execute(), get_price(), etc. Regras de negócio devem propagar: “desabilitar um grupo desabilita tudo dentro”, “aplicar desconto ao pacote impacta os itens”.
+
+Como benefícios temos:
+- Uniformidade de uso: reduz if isinstance(...) espalhados para diferenciar folha de nó.
+- Extensibilidade: adicionar novos tipos de componente exige menos mudanças no cliente.
+- Recursão elegante: operações agregadas (soma, média, render) fluem naturalmente.
+
 
 ### Quando usar
 
@@ -371,11 +379,16 @@ class Main {
 
 ## 4. Decorator
 
-O Decorator adiciona comportamentos dinamicamente sem herança, “embrulhando” um objeto com outro que implementa a mesma interface.
+O Decorator adiciona comportamentos dinamicamente sem herança, “embrulhando” um objeto com outro que implementa a mesma interface. Ao adicionar responsabilidades dinamicamente embrulhando o objeto, sem herança explosiva. Podemos utilizar quando desejamos funcionalidades combináveis e opcionais, como: borda, sombra, cache, logging, compressão. Você quer evitar subclasses BordaSombraLoggingDrawable etc. Quando precisa alterar comportamento em runtime (ligar/desligar features).
+
+Podemos determinar alguns benefícios:
+- Composição > herança: combina recursos em qualquer ordem.
+- Aberto/Fechado: novas responsabilidades sem tocar nas classes base.
+- Granularidade: cada decorator foca em uma única preocupação (ex.: só logging).
 
 ### Quando Utilizar
 
-Quando quer “plugar” funcionalidades (borda, sombra, logging) em qualquer Drawable de forma combinável. Quando quiser combinar recursos opcionais (ex.: borda, sombra, cor, logging) sem explodir subclasses e mantendo abertura para composição em tempo de execução.
+Quando quer “plugar” funcionalidades (borda, sombra, logging) em qualquer Drawable de forma combinável. Quando quiser combinar recursos opcionais (ex.: borda, sombra, cor, logging) sem explodir subclasses e mantendo abertura para composição em tempo de execução. 
 
 ### Exemplo de Uso
 
@@ -454,7 +467,12 @@ public class Main {
 
 ## 5. Facade
 
-O Facade fornece uma interface simplificada para um subsistema complexo, escondendo detalhes e passos internos.
+O Facade fornece uma interface simplificada para um subsistema complexo, escondendo detalhes e passos internos. Desta forma, torna-se possível fornecer uma interface simples para um subsistema complexo (múltiplas classes/ordens de chamada). Devemos utilizar quando o cliente precisa de “um botão” para fluxos com muitos passos/objetos (pipeline de mídia, orquestração de APIs). Quando você quer diminuir acoplamento com detalhes internos que mudam com frequência. Ainda quando precisa impor ordem/protocolo correto de chamadas sem expor tudo.
+
+Como benefícios:
+- Simplicidade para o cliente: reduz curva de aprendizado e erros de uso.
+- Encapsulamento de mudança: trocar bibliotecas internas impacta só a facade.
+- Ponto único de políticas: retries, timeouts, métricas ficam centralizados.
 
 ### Quando Utilizar
 
@@ -516,7 +534,11 @@ class Main {
 
 ### Quando Utilizar
 
-Muitos objetos semelhantes consomem memória; parte do estado pode ser compartilhada (ex.: estilo/pen/cor). Em Python, lembre de interns de strings.
+Muitos objetos semelhantes consomem memória; parte do estado pode ser compartilhada (ex.: estilo/pen/cor). Em Python, lembre de interns de strings. Com ele, compartilhar estado intrínseco imutável entre muitos objetos parecidos para economizar memória; manter o estado extrínseco fora. É possível obter milhares/milhões de itens com grande parte de estado repetido (fonte, cor, textura, shape). Muitas vezes, a memória é gargalo (mapas, editores de texto, jogos com muitos tiles/partes).
+
+Alguns benefícios para sua utilização:
+- Ordem(s) de grandeza menos objetos/bytes alocados.
+- Caches mais eficazes e menor pressão no Garbage-Collector.
 
 ### Exemplo de Uso
 
@@ -567,7 +589,13 @@ class Main {
 
 ### Quando Utilizar
 
-Você quer lazy-load, caching, segurança ou acesso remoto sem mudar o cliente.
+Você quer lazy-load, caching, segurança ou acesso remoto sem mudar o cliente. Um “substituto” que controla o acesso ao objeto real para lazy-load, cache, segurança, controle remoto, logging.
+Ele permite a criação cara ou acesso remoto (banco, filesystem, serviço externo): carregue sob demanda. Possibilita também o Cross-cutting concerns locais ao acesso: cache de resultados, rate limiting, authz. Traz proteção: restringir operações sem mudar o cliente.
+
+Como benefícios podemos citar:
+- Transparência para o cliente: mesma interface; alternar real/proxy não quebra código.
+- Performance/perfil de recursos: on-demand, cache, pooling.
+- Segurança e governança: ponto único para autenticar/autorizar/registrar.
 
 ### Exemplo de Uso
 
@@ -623,3 +651,86 @@ class Main {
 ```
 
 ## 8. Sugestões de Exercícios
+
+### 8.1 Editor de Cena 2D (Composite + Decorator + Proxy)
+
+#### Contexto
+
+Você está construindo um pequeno editor de cenas 2D para jogos. O usuário pode criar sprites, agrupá-los em camadas e grupos, e aplicar efeitos visuais (borda, sombra, opacidade) ativáveis/desativáveis em tempo de execução. As texturas de sprites vêm de disco ou URL e podem ser caras de carregar.
+
+#### Objetivos de aprendizagem
+
+Tratar folhas e composições de forma uniforme (Composite).
+Adicionar comportamentos opcionais sem explodir subclasses (Decorator).
+Adiar carregamento de recursos e cachear acessos (Proxy).
+
+#### Requisitos funcionais
+
+1. Composite
+- Interface Drawable com draw() e bounds().
+- Sprite (folha) e Group (composto).
+- Group permite add(child), remove(child) e chama draw() recursivamente.
+
+2. Decorator
+- Decorators Border, Shadow, Opacity implementam Drawable e embrulham outro Drawable.
+- Ordem de aplicação afeta o resultado (teste isso).
+- Deve ser possível empilhar decorators dinamicamente.
+
+3. Proxy
+- Texture real carrega imagem de uma origem (simule custo/latência).
+- TextureProxy com lazy-load no primeiro uso, cache em memória, e métricas (quantas cargas).
+- Caso de falha (simulada) deve ser tratado sem quebrar o editor (ex.: placeholder).
+
+### 8.2 Editor de Texto Rico (Flyweight + Composite + Facade)
+
+#### Contexto
+
+Você está implementando o núcleo de um editor de texto tipo “code/notes”. Cada caractere (glifo) tem estilo (fonte, tamanho, cor, peso). O documento tem seções e parágrafos. A exportação para PDF/HTML é um pipeline chato e com várias etapas.
+
+#### Objetivos de aprendizagem
+
+Reduzir uso de memória por estilos repetidos (Flyweight).
+Representar documento como árvore e percorrê-la uniformemente (Composite).
+Expor um ponto único para exportação, escondendo o subsistema (Facade).
+
+#### Requisitos funcionais
+
+1. Flyweight
+- TextStyle (intrínseco, imutável): font, size, color, weight.
+- StyleFactory.get(font,size,color,weight) reutiliza instâncias iguais.
+- Glyph(char, style, position) carrega estado extrínseco (posição, índice).
+
+2. Composite
+- Nós: Document → Section → Paragraph → GlyphRun → Glyph.
+- Operações uniformes: render(), word_count(), find(text).
+
+3. Facade
+- ExportFacade com to_pdf(document, path) e to_html(document, path).
+- Internamente, etapas: normalização → layout → render → persistência.
+
+### 8.3 Plataforma de Notificações Multicanal (Facade + Proxy + Decorator)
+
+#### Contexto
+
+Uma empresa precisa enviar notificações por e-mail, SMS, WhatsApp e push. Há múltiplos fornecedores (gateways) por canal. Regras transversais (logging, retry/backoff, métricas) devem ser plugáveis. Latência de fornecedores varia e alguns têm limites de taxa.
+
+#### Objetivos de aprendizagem
+
+Fornecer uma API única ao cliente para orquestrar envios (Facade).
+Interpor acesso aos adaptadores remotos com cache, rate limiting, timeouts (Proxy).
+Habilitar concerns opcionais (retry, logging, tracing) como camadas (Decorator).
+
+#### Requisitos funcionais
+
+1. Facade
+- NotificationService.send(message, audience, channels=[...]).
+- O cliente não conhece a ordem/seleção de gateways nem retries.
+
+2. Proxy
+- Para cada gateway remoto (EmailGateway, SmsGateway, etc.), um GatewayProxy:
+- Timeout configurável, rate limit simples (token bucket ou janela deslizante), circuit breaker básico (abre após N falhas).
+- Cache opcional para templates/carimbos de configuração (não cachear envios).
+
+3. Decorator
+- RetryPolicy, Logging, Tracing decoram um Sender comum.
+- Ordem deve ser configurável (ex.: Logging(Retry(SmsSender))).
