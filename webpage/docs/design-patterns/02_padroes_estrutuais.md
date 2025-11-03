@@ -313,3 +313,313 @@ class Main {
 }
 ```
 
+## 3. Composite
+
+O Composite permite compor objetos em estruturas em árvore (parte–todo) e tratar objetos individuais e composições de maneira uniforme.
+
+### Quando usar
+
+Você precisa tratar indivíduos e grupos de forma uniforme (em Python, pense numa lista com elementos que também são listas recursivamente). Use quando precisar representar hierarquias (camadas, grupos, cenas) e quer que o cliente chame o mesmo método (draw(), execute(), etc.) tanto para elementos simples quanto para grupos.
+
+### Exemplo de Utilização
+
+```java
+import java.util.*;
+
+interface Drawable { void draw(); }
+
+// Folhas
+class Circle implements Drawable { 
+    private final int r; 
+    public Circle(int r){this.r=r;} 
+    public void draw(){ System.out.println("Circle r="+r); } 
+}
+
+
+class Rect implements Drawable { 
+    private final int w,h; 
+    public Rect(int w,int h){this.w=w;this.h=h;} 
+    public void draw(){ 
+        System.out.println("Rect "+w+"x"+h); 
+        } 
+}
+
+
+// Composto
+class Group implements Drawable {
+    private final List<Drawable> children = new ArrayList<>();
+    public Group add(Drawable d){ 
+        children.add(d); 
+        return this; 
+        }
+    public void draw(){ 
+        children.forEach(Drawable::draw); 
+        }
+}
+
+class Main {
+    public static void main(String[] args){
+        Group root = new Group()
+        .add(new Circle(10))
+        .add(new Rect(20,15));
+        Group layer = new Group().add(new Circle(5)).add(new Circle(7));
+        root.add(layer);
+        root.draw(); // desenha tudo
+    }
+}
+```
+
+## 4. Decorator
+
+O Decorator adiciona comportamentos dinamicamente sem herança, “embrulhando” um objeto com outro que implementa a mesma interface.
+
+### Quando Utilizar
+
+Quando quer “plugar” funcionalidades (borda, sombra, logging) em qualquer Drawable de forma combinável. Quando quiser combinar recursos opcionais (ex.: borda, sombra, cor, logging) sem explodir subclasses e mantendo abertura para composição em tempo de execução.
+
+### Exemplo de Uso
+
+```java
+interface Drawable { void draw(); }
+
+
+// Núcleo (component)
+class Circle implements Drawable { 
+    private final int r; 
+    public Circle(int r){
+        this.r=r;
+    } 
+    public void draw(){ 
+        System.out.println("Circle r="+r); 
+    } 
+    
+}
+
+class Rect implements Drawable {
+    private final int w,h;
+    public Rect(int w, int h){
+        this.w = w;
+        this.h = h;
+    }
+
+    public void draw(){
+        System.out.println("Rect w="+this.w+" h="+ this.h);
+    }
+}
+
+// Decorator base
+abstract class DrawableDecorator implements Drawable {
+    protected final Drawable inner;
+    protected DrawableDecorator(Drawable inner){ 
+        this.inner = inner; 
+    }
+}
+
+
+// Concretos
+class BorderDecorator extends DrawableDecorator {
+    public BorderDecorator(Drawable d){ 
+        super(d); 
+    }
+    public void draw(){ 
+        System.out.println("+ Borda 1px"); 
+        inner.draw(); 
+    }
+}
+
+
+class ShadowDecorator extends DrawableDecorator {
+    public ShadowDecorator(Drawable d){ 
+        super(d); 
+    }
+    public void draw(){ 
+        System.out.println("+ Sombra suave"); 
+        inner.draw(); 
+    }
+}
+
+
+public class Main {
+    public static void main(String[] args){
+        Drawable base = new Circle(12);
+        Drawable fancy = new BorderDecorator(new ShadowDecorator(base));
+        fancy.draw();
+
+        base = new Rect(3,4);
+        fancy = new ShadowDecorator(base);
+        fancy.draw();
+    }
+}
+```
+
+## 5. Facade
+
+O Facade fornece uma interface simplificada para um subsistema complexo, escondendo detalhes e passos internos.
+
+### Quando Utilizar
+
+Você tem vários passos/objetos internos e quer expor uma API simples para o usuário (em Python, pense num módulo que encapsula detalhes feios). Quando o cliente não precisa conhecer várias classes/ordens de chamada internas e você quer entregar uma API coesa e fácil.
+
+### Exemplo de Uso
+
+```java
+// Subsistema (oculto ao cliente)
+class VectorEngine { 
+    void line(){ 
+        System.out.println("[Vector] line()"); 
+    } 
+}
+
+class RasterEngine { 
+    void blit(){ 
+        System.out.println("[Raster] blit()"); 
+    } 
+}
+
+
+class AssetLoader { 
+    void load(String p){ 
+        System.out.println("[Asset] load "+p); 
+    } 
+}
+
+
+// Facade
+class GraphicsFacade {
+    private final VectorEngine vector = new VectorEngine();
+    private final RasterEngine raster = new RasterEngine();
+    private final AssetLoader assets = new AssetLoader();
+
+    public void drawCircle(int r){ 
+        vector.line(); 
+        System.out.println("draw circle r="+r); 
+    }
+    public void drawImage(String path){ 
+        assets.load(path); 
+        raster.blit(); 
+        System.out.println("image: "+path); 
+    }
+}
+
+
+// Cliente
+class Main {
+    public static void main(String[] args){
+        GraphicsFacade g = new GraphicsFacade();
+        g.drawCircle(10);
+        g.drawImage("/imgs/logo.png");
+    }
+}
+```
+
+## 6. Flyweight
+
+### Quando Utilizar
+
+Muitos objetos semelhantes consomem memória; parte do estado pode ser compartilhada (ex.: estilo/pen/cor). Em Python, lembre de interns de strings.
+
+### Exemplo de Uso
+
+```java
+// Estado intrínseco compartilhado
+class ShapeStyle {
+    public final String stroke; 
+    public final String fill;
+    private ShapeStyle(String stroke,String fill){ 
+        this.stroke=stroke; 
+        this.fill=fill; 
+    }
+    // Factory com cache
+    private static final java.util.Map<String,ShapeStyle> CACHE = new java.util.HashMap<>();
+    public static ShapeStyle of(String stroke,String fill){
+        String key = stroke+"|"+fill;
+        return CACHE.computeIfAbsent(key, k -> new ShapeStyle(stroke, fill));
+    }
+}
+
+
+// Objetos leves referenciam o estilo
+class Circle { 
+    private final int r; 
+    private final ShapeStyle style;
+    public Circle(int r, ShapeStyle s){ 
+        this.r=r; 
+        this.style=s; 
+    }
+    public void draw(){ 
+        System.out.println("Circle r="+r+" style=("+style.stroke+","+style.fill+")"); 
+    }
+}
+
+
+class Main {
+    public static void main(String[] args){
+        var red = ShapeStyle.of("#f00","none");
+        var red2 = ShapeStyle.of("#f00","none");
+        System.out.println("Mesma instância? "+(red==red2)); // true
+        new Circle(5, red).draw();
+        new Circle(10, red2).draw();
+    }
+}
+```
+
+## 7. Proxy
+
+### Quando Utilizar
+
+Você quer lazy-load, caching, segurança ou acesso remoto sem mudar o cliente.
+
+### Exemplo de Uso
+
+```java
+// Sujeito real pesado
+class HeavyImage implements Image {
+    private final String path; 
+    private boolean loaded=false;
+    HeavyImage(String p){ 
+        this.path=p; 
+    }
+    private void load(){ 
+        if(!loaded){ 
+            System.out.println("[LOAD] "+path); 
+            loaded=true; 
+        } 
+    }
+    public void show(){ 
+        load(); 
+        System.out.println("show "+path); 
+    }
+}
+
+
+// Interface comum
+interface Image { void show(); }
+
+
+// Proxy virtual: carrega sob demanda e faz cache
+class ImageProxy implements Image {
+    private final String path; 
+    private HeavyImage real;
+    public ImageProxy(String p){ 
+        this.path=p; 
+    }
+    public void show(){
+        if(real==null){ 
+            real = new HeavyImage(path); 
+        }
+        real.show();
+    }
+}
+
+
+// Cliente
+class Main {
+    public static void main(String[] args){
+        Image img = new ImageProxy("/imgs/bg-huge.png");
+        System.out.println("— primeiro show —"); img.show();
+        System.out.println("— segundo show —"); img.show(); // Sem recarregar
+    }
+}
+```
+
+## 8. Sugestões de Exercícios
